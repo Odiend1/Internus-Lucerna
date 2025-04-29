@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lucerna</title>
+  <style>
+
+    html, body{
+      height: 100%;
+      width: 100%;
+      background-color: #0a0019;
+      /* background-color: #fff; */
+    }
+
+    h1, h2, h3, h4, h5, h6, label, p{
+      color: #ffffff;
+      /* color: #000000; */
+    }
+
+    .ai-response {
+        background-color: none;
+        margin: 5%;
+        border-radius: 20px;
+        border-top-left-radius: 2px;
+        padding: 2%;
+        color: #ffffff;
+        /* color: #000; */
+        width:50%;
+        /* margin-right:50%; */
+        float: left;
+        font-family: monospace;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .user-response {
+        background-color: #5602b0;
+        margin: 5%;
+        border-radius: 20px;
+        border-top-right-radius: 2px;
+        padding: 2%;
+        color: #ffffff;
+        /* color: #000; */
+        width:30%;
+        /* margin-left:40%;
+        margin-right:12%; */
+        float: right;
+        font-family: monospace;
+    }
+
+    #corner-decal{
+      -webkit-transform: scaleX(-1);
+      transform: scaleX(-1);
+      -webkit-transform: scaleY(-1);
+      transform: scaleY(-1);
+      position: absolute;
+      bottom:0;
+      right:0;
+    }
+
+    #user-message{
+      width: 70%;
+      height: auto;
+      font-size: 20px;
+      border-radius: 10px;
+      resize: none;
+      margin-top: 5%;
+    }
+
+    #send{
+      height: 50px;
+      width: 50px;
+      font-size: 30px;
+      border-radius: 25px;
+      background-color: rgb(117, 0, 233);
+      margin: 5px;
+      margin-bottom: 0;
+    }
+  </style>
+  <title>Document</title>
+</head>
+<body>
+  <div>
+  <!-- <h1 style="font-family: monospace; margin: 20px 0px 0px 20px;">Lucerna</h1>
+  <h4 style="font-family: monospace; margin: 10px 0px 0px 20px;">Your guiding light.</h4> -->
+  </div>
+  <div id="user-chat">
+    <div id="messages-container">
+    </div>
+  <br><br><br>
+  <p id="ai-response"></p>
+  <div style="width: 100%; text-align: center;">
+  <textarea id="user-message"></textarea><button id="send">➤</button>
+  </div>
+  <br>
+  </div>
+  <audio id="ai-speech"></audio>
+  <script>
+    const date = new Date();
+    var threadID = 0;
+    const aiSpeechAudio = document.getElementById("ai-speech");
+    function amplifyMedia(mediaElem, multiplier) {
+      var context = new (window.AudioContext || window.webkitAudioContext),
+          result = {
+            context: context,
+            source: context.createMediaElementSource(mediaElem),
+            gain: context.createGain(),
+            media: mediaElem,
+            amplify: function(multiplier) { result.gain.gain.value = multiplier; },
+            getAmpLevel: function() { return result.gain.gain.value; }
+          };
+      result.source.connect(result.gain);
+      result.gain.connect(context.destination);
+      result.amplify(multiplier);
+      return result;
+    }
+    amplifyMedia(aiSpeechAudio, 2);
+    function sendUserMessage(message){
+      var customerServiceMessageInput = document.getElementById("user-message");
+      var messageP = document.createElement('p');
+      document.getElementById('messages-container').appendChild(messageP);
+      messageP.classList.add("user-response");
+      messageP.innerHTML = message;
+      window.scrollTo(0, document.body.scrollHeight);
+      if(message.trim() === ''){
+        messageP.style.padding = "0.1%";
+        messageP.style.marginTop = "0.5%";
+        messageP.style.marginBottom = "0.5%";
+      }
+      const userInput = encodeURIComponent("USER MESSAGE: " + message);
+      customerServiceMessageInput.value = "";
+      var voiceRadios = document.getElementsByName("voice");
+      let selectedVoice = "alloy";
+      for (let i = 0; i < voiceRadios.length; i++){
+        if(voiceRadios[i].checked) selectedVoice = voiceRadios[i].value.toLowerCase();
+      }
+      fetch(`/api/user-message?input=${userInput}&threadID=${threadID}&voice=${selectedVoice}`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          }
+      })
+      .then(response => response.json())
+      .then(data => {
+          var responseP = document.createElement('p');
+          document.getElementById('messages-container').appendChild(responseP);
+          responseP.classList.add("ai-response");
+          window.scrollTo(0, document.body.scrollHeight);
+          if(data.response == undefined || JSON.parse(data.response).message.trim() === ''){
+            responseP.style.padding = "0.1%";
+            responseP.style.marginTop = "0.5%";
+            responseP.style.marginBottom = "0.5%";
+            return;
+          }
+          responseP.innerHTML = "<img src='lucerna.png' style='height: 20px;float: left;margin-bottom: 0; display: inline-block;'>" + '<span style="display:inline-block; margin-left: 50px; transform: translateY(-0px);">' + JSON.parse(data.response).message.replaceAll("\n", "<br>") + "</span>" //.split("[MISSION_CONTROL]")[0];
+          window.scrollTo(0, document.body.scrollHeight);
+          /*if(JSON.parse(data.response).message.includes("[MISSION_CONTROL]")){
+            var mcResponseP = document.createElement('p');
+            document.getElementById('messages-container').appendChild(mcResponseP);
+            mcResponseP.classList.add("ai-response");
+            mcResponseP.style.backgroundColor = "#ffff27";
+            mcResponseP.innerHTML = JSON.parse(data.response).message.replaceAll("\n", "<br>").split("[MISSION_CONTROL]")[1]
+            window.scrollTo(0, document.body.scrollHeight);
+          }*/
+          threadID = JSON.parse(data.response).id;
+          /*var msg = new SpeechSynthesisUtterance();
+          msg.text = JSON.parse(data.response).message.replaceAll("*", "");
+          window.speechSynthesis.speak(msg);*/
+          speechPath = JSON.parse(data.response).speechPath;
+          function playSpeech(){
+            var xhr = new XMLHttpRequest();
+            xhr.open('HEAD', speechPath, true);
+            xhr.onreadystatechange = function() {
+              if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                  aiSpeechAudio.src=speechPath;
+                  // aiSpeechAudio.play();
+                } else {
+                  setTimeout(playSpeech,100);
+                }
+              }
+            };
+            xhr.send();
+          }
+          playSpeech();
+
+      })
+      .catch(error => {
+          console.error('Error fetching GPT response:', error);
+      });
+    }
+    document.getElementById("send").onclick = function(){
+      var customerServiceMessageInput = document.getElementById("user-message");
+      aiSpeechAudio.pause();
+      aiSpeechAudio.currentTime = 0;
+      sendUserMessage(customerServiceMessageInput.value);
+    }
+
+    document.getElementById("heart-rate-range").value = 80;
+    function updateHeartRate(){
+      document.getElementById("heart-rate-label").textContent = "❤️ " + document.getElementById("heart-rate-range").value +" bpm";
+    }
+    function updateBloodPressure(){
+      document.getElementById("blood-pressure-label").textContent = Math.ceil((document.getElementById("blood-pressure-range").value)*1.5) + "/" + document.getElementById("blood-pressure-range").value +" mmHg";
+    }
+    function updateSpO2(){
+      document.getElementById("spo2-label").textContent = "SpO2: " + document.getElementById("spo2-range").value +"%";
+    }
+    // function sendVitals(){
+    //   let heartRate = document.getElementById("heart-rate-range").value;
+    //   let bloodPressure = Math.ceil(parseInt(document.getElementById("blood-pressure-range").value)*1.5) + "/" + document.getElementById("blood-pressure-range").value + " mmHg";
+    //   let spO2 = document.getElementById("spo2-range").value + "%";
+    //   let status = `Time: ${date}; Heart Rate: ${heartRate}; Blood Pressure: ${bloodPressure}; SpO2: ${spO2}`;
+    //   var voiceRadios = document.getElementsByName("voice");
+    //   let selectedVoice = "alloy";
+    //   for (let i = 0; i < voiceRadios.length; i++){
+    //     if(voiceRadios[i].checked) selectedVoice = voiceRadios[i].value.toLowerCase();
+    //   }
+    //   console.log("Sending " + status)
+    //   fetch(`/api/system-message?input=${status}&threadID=${threadID}&voice=${selectedVoice}`, {
+    //       method: 'POST',
+    //       headers: {
+    //           'Content-Type': 'application/json'
+    //       }
+    //   })
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     var responseP = document.createElement('p');
+    //     document.getElementById('messages-container').appendChild(responseP);
+    //     responseP.classList.add("ai-response");
+    //     window.scrollTo(0, document.body.scrollHeight);
+    //     if(data.response == undefined || JSON.parse(data.response).message.trim() === ''){
+    //       responseP.style.padding = "0.1%";
+    //       responseP.style.marginTop = "0.5%";
+    //       responseP.style.marginBottom = "0.5%";
+    //       return;
+    //     }
+    //     responseP.innerHTML = JSON.parse(data.response).message.replaceAll("\n", "<br>")//.split("[MISSION_CONTROL]")[0];
+    //       // if(JSON.parse(data.response).message.includes("[MISSION_CONTROL]")){
+    //       //   var mcResponseP = document.createElement('p');
+    //       //   document.getElementById('messages-container').appendChild(mcResponseP);
+    //       //   mcResponseP.classList.add("ai-response");
+    //       //   mcResponseP.style.backgroundColor = "#ffff27";
+    //       //   mcResponseP.innerHTML = JSON.parse(data.response).message.replaceAll("\n", "<br>").split("[MISSION_CONTROL]")[1]
+    //       //   window.scrollTo(0, document.body.scrollHeight);
+    //       // }
+    //     threadID = JSON.parse(data.response).id;
+    //     /*var msg = new SpeechSynthesisUtterance();
+    //     msg.text = JSON.parse(data.response).message.replaceAll("*", "");
+    //     window.speechSynthesis.speak(msg);*/
+    //     speechPath = JSON.parse(data.response).speechPath;
+    //     function playSpeech(){
+    //       var xhr = new XMLHttpRequest();
+    //       xhr.open('HEAD', speechPath, true);
+    //       xhr.onreadystatechange = function() {
+    //         if (xhr.readyState === 4) {
+    //           if (xhr.status === 200) {
+    //             aiSpeechAudio.src=speechPath;
+    //             aiSpeechAudio.play();
+    //           } else {
+    //             setTimeout(playSpeech,100);
+    //           }
+    //         }
+    //       };
+    //       xhr.send();
+    //     }
+    //     playSpeech();
+
+    //   })
+    //   .catch(error => {
+    //       console.error('Error fetching GPT response:', error);
+    //   });
+    // }
+    document.getElementById("heart-rate-range").addEventListener("change", sendVitals);
+    document.getElementById("blood-pressure-range").addEventListener("change", sendVitals);
+    document.getElementById("spo2-range").addEventListener("change", sendVitals);
+  </script>
+  <audio id="ding-audio" src="ding.mp3" volume="0.6">Sound Effect from <a href="https://pixabay.com/sound-effects/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=89718">Pixabay</a></audio>
+  <script>
+    var userMessageBox = document.getElementById('user-message');
+    // Check for browser compatibility
+// if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+
+// // Create a new SpeechRecognition object
+// const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+// // Set properties
+// recognition.continuous = true; // Keep listening until stopped
+// recognition.interimResults = true; // Get interim results as the user speaks
+// recognition.lang = 'en-US'; 
+
+// // Start recognition
+// recognition.start();
+
+// var transcripts = [];
+// var inProgressSentence = "";
+// var currentIndex = 0;
+// var resultIndex = 0;
+// var silenceTime = 0;
+// // function silenceTimeIntervalFunction(){
+// //   if(silenceTime > 5 && silenceTime <= 5.1){
+// //     console.log("I'M STILL STANDING")
+// //     console.log(silenceTime);
+// //     console.log("FINAL: " + transcripts[transcripts.length - 1]);
+// //     currentIndex++;
+// //   }
+// //   silenceTime += 0.1;
+// // }
+// // var silenceTimeInterval = setInterval(silenceTimeIntervalFunction, 100);
+// // Event handlers
+// recognition.onresult = (event) => {
+//   silenceTime = 0;
+//   const transcript = event.results[event.results.length - 1][0].transcript;
+//   if(event.results.length - 1 > currentIndex + 1 || resultIndex > event.results.length - 1){
+//     transcripts[currentIndex] = event.results[resultIndex-1][0].transcript;
+//     console.log("FINAL: " + transcripts[currentIndex]);
+//     currentIndex++;
+//   }
+//   resultIndex = event.results.length - 1;
+//   transcripts[event.results.length - 1] = transcript;
+//   inProgressSentence = transcript;
+//   console.log(event.results.length - 1 + " " + transcript); 
+// };
+
+// recognition.onerror = (event) => {
+//   console.error('Speech recognition error:', event.error);
+//   const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+// // Set properties
+// recognition.continuous = true; // Keep listening until stopped
+// recognition.interimResults = true; // Get interim results as the user speaks
+// recognition.lang = 'en-US'; 
+
+// // Start recognition
+// recognition.start();
+// };
+
+// } else {
+// console.error('Speech recognition not supported in this browser.');
+// }
+
+  var startedRecording = false;
+  var startIndex = 0;
+  var endIndex = 0;
+  onkeydown = function(e) {
+    if(e.key === 'Enter' && !e.shiftKey && document.activeElement == userMessageBox && userMessageBox.value.trim() != ""){
+      e.preventDefault();
+      sendUserMessage(userMessageBox.value);
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+    if(e.key === ' ' && document.activeElement != userMessageBox){
+      // if(!startedRecording){
+      //   aiSpeechAudio.pause();
+      //   aiSpeechAudio.currentTime = 0;
+      //   document.getElementById("ding-audio").play()
+      //   startIndex = currentIndex;
+      //   startedRecording = true;
+      // }
+      // else{
+      //   setTimeout(function(){
+      //     endIndex = currentIndex;
+      //     startedRecording = false;
+      //     var fullMessage = "";
+      //     for(let i = startIndex; i < endIndex; i++){
+      //       if(transcripts[i].trim() != "" && (i + 1 < endIndex) ? !transcripts[i+1].includes(transcripts[i]) : true) fullMessage += transcripts[i].slice(0,1).toUpperCase() + transcripts[i].slice(1) + ".";
+      //     }
+      //     if(inProgressSentence !== transcripts[currentIndex-1]) {
+      //       currentIndex++;
+      //       fullMessage += inProgressSentence;
+      //     }
+      //     console.log("USER MESSAGE: " + fullMessage)
+      //     sendUserMessage(fullMessage);
+      //   }, 1000)
+      // }
+    }
+  }
+  </script>
+  <script>
+    userMessageBox = document.getElementById("user-message");
+    sendButton = document.getElementById("send");
+    sendButton.style.transform = 'translateY(' + (-userMessageBox.scrollHeight/2 + 10) + 'px' + ')';
+    userMessageBox.addEventListener('input', () => {
+      userMessageBox.style.height = 'auto'; 
+      userMessageBox.style.height = userMessageBox.scrollHeight + 'px'; 
+      sendButton.style.transform = 'translateY(' + (-userMessageBox.scrollHeight/2 + 10) + 'px' + ')';
+    });
+  </script>
+</body>
+</html>

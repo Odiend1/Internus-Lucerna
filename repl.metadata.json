@@ -1,0 +1,40 @@
+{
+    "id": "edd41bf2-0e07-4291-9c4d-665d0c5ea12d",
+    "title": "TSA Webmaster 2024-2025",
+    "isPrivate": false,
+    "slug": "TSA-Webmaster-2024-2025",
+    "wasPublished": false,
+    "timeCreated": "2024-08-16T17:40:53.692Z",
+    "timeUpdated": "2024-08-20T19:13:13.276Z",
+    "user": {
+        "id": 6493414,
+        "username": "Odiend1"
+    },
+    "language": "nix",
+    "config": {
+        "isServer": true,
+        "isExtension": null,
+        "gitRemoteUrl": null,
+        "isVnc": false,
+        "doClone": null
+    },
+    "multiplayers": [],
+    "source": {
+        "release": {
+            "id": "66e1ca0d-5d4e-4717-b8bb-f746e9c955d3",
+            "description": "Update nix channel to 24.05",
+            "hostedUrl": "https://release-66e1ca0d-5d4e-4717-b8bb-f746e9c955d3.id.repl.co",
+            "user": {
+                "id": 34602710,
+                "username": "victor-replit"
+            }
+        },
+        "deployment": {
+            "id": 426,
+            "domain": null
+        }
+    },
+    "domains": [],
+    "isAlwaysOn": false,
+    "isBoosted": false
+}
