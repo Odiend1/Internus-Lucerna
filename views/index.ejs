@@ -33,6 +33,7 @@
         font-family: monospace;
         margin-top: 0;
         margin-bottom: 0;
+        overflow-wrap: break-word;
     }
 
     .user-response {
@@ -48,6 +49,7 @@
         margin-right:12%; */
         float: right;
         font-family: monospace;
+        overflow-wrap: break-word;
     }
 
     #corner-decal{
@@ -348,6 +350,10 @@
     if(e.key === 'Enter' && !e.shiftKey && document.activeElement == userMessageBox && userMessageBox.value.trim() != ""){
       e.preventDefault();
       sendUserMessage(userMessageBox.value);
+      sendButton = document.getElementById("send");
+      userMessageBox.style.height = 'auto'; 
+      userMessageBox.style.height = userMessageBox.scrollHeight + 'px'; 
+      sendButton.style.transform = 'translateY(' + (-userMessageBox.scrollHeight/2 + 10) + 'px' + ')';
       window.scrollTo(0, document.body.scrollHeight);
     }
     if(e.key === ' ' && document.activeElement != userMessageBox){
