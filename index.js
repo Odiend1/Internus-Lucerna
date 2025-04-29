@@ -160,23 +160,23 @@ async function getAudioResponse(userInput, threadID, queryRole="user", requested
   const parsedResponse = JSON.parse(gptResponseMessage);
   parsedResponse["message"] = parsedResponse.message.split("[MISSION_CONTROL]")[0].trim();
 
-  if (!threadSpeeches[parsedResponse.id]) {
-      threadSpeeches[parsedResponse.id] = 1;
-  } else {
-      threadSpeeches[parsedResponse.id]++;
-  }
+  // if (!threadSpeeches[parsedResponse.id]) {
+  //     threadSpeeches[parsedResponse.id] = 1;
+  // } else {
+  //     threadSpeeches[parsedResponse.id]++;
+  // }
 
-  const speechFile = path.resolve(`./public/speech/${parsedResponse.id}-${threadSpeeches[parsedResponse.id]}.mp3`);
-  parsedResponse["speechPath"] = `speech/${parsedResponse.id}-${threadSpeeches[parsedResponse.id]}.mp3`;
+  // const speechFile = path.resolve(`./public/speech/${parsedResponse.id}-${threadSpeeches[parsedResponse.id]}.mp3`);
+  // parsedResponse["speechPath"] = `speech/${parsedResponse.id}-${threadSpeeches[parsedResponse.id]}.mp3`;
 
-  const mp3 = await openai.audio.speech.create({
-      model: "gpt-4o-mini-tts",
-      voice: requestedVoice,
-      input: parsedResponse.message.replaceAll("*", ""),
-  });
+  // const mp3 = await openai.audio.speech.create({
+  //     model: "gpt-4o-mini-tts",
+  //     voice: requestedVoice,
+  //     input: parsedResponse.message.replaceAll("*", ""),
+  // });
 
-  const buffer = Buffer.from(await mp3.arrayBuffer());
-  await fs.promises.writeFile(speechFile, buffer);
+  // const buffer = Buffer.from(await mp3.arrayBuffer());
+  // await fs.promises.writeFile(speechFile, buffer);
 
   return JSON.stringify(parsedResponse);
 }

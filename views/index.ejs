@@ -168,23 +168,23 @@
           /*var msg = new SpeechSynthesisUtterance();
           msg.text = JSON.parse(data.response).message.replaceAll("*", "");
           window.speechSynthesis.speak(msg);*/
-          speechPath = JSON.parse(data.response).speechPath;
-          function playSpeech(){
-            var xhr = new XMLHttpRequest();
-            xhr.open('HEAD', speechPath, true);
-            xhr.onreadystatechange = function() {
-              if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                  aiSpeechAudio.src=speechPath;
-                  // aiSpeechAudio.play();
-                } else {
-                  setTimeout(playSpeech,100);
-                }
-              }
-            };
-            xhr.send();
-          }
-          playSpeech();
+          // speechPath = JSON.parse(data.response).speechPath;
+          // function playSpeech(){
+          //   var xhr = new XMLHttpRequest();
+          //   xhr.open('HEAD', speechPath, true);
+          //   xhr.onreadystatechange = function() {
+          //     if (xhr.readyState === 4) {
+          //       if (xhr.status === 200) {
+          //         aiSpeechAudio.src=speechPath;
+          //         // aiSpeechAudio.play();
+          //       } else {
+          //         setTimeout(playSpeech,100);
+          //       }
+          //     }
+          //   };
+          //   xhr.send();
+          // }
+          // playSpeech();
 
       })
       .catch(error => {
