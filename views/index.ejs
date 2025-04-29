@@ -157,7 +157,7 @@
             responseP.style.marginBottom = "0.5%";
             return;
           }
-          responseP.innerHTML = "<img src='lucerna.png' style='height: 20px;float: left;margin-bottom: 0; display: inline-block;'>" + '<span style="display:inline-block; margin-left: 50px; transform: translateY(-0px);">' + JSON.parse(data.response).message.replaceAll("\n", "<br>") + "</span>" //.split("[MISSION_CONTROL]")[0];
+          responseP.innerHTML = "<img src='lucerna.png' style='height: 20px;float: left;margin-bottom: 0; display: inline-block;'>" + '<span style="display:inline-block; margin-left: 50px; transform: translateY(-0px);">' + JSON.parse(data.response).message.replaceAll("\n", "<br>").replaceAll("**", "") + "</span>" //.split("[MISSION_CONTROL]")[0];
           window.scrollTo(0, document.body.scrollHeight);
           /*if(JSON.parse(data.response).message.includes("[MISSION_CONTROL]")){
             var mcResponseP = document.createElement('p');
